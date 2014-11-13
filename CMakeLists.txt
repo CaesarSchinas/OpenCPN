@@ -1132,9 +1132,6 @@ ENDIF(BUNDLE_DOCS MATCHES "ON")
 SET_SOURCE_FILES_PROPERTIES(
            buildosx/opencpn.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 
-SET_SOURCE_FILES_PROPERTIES(
-           buildosx/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources/English.lproj )
-
 #  These variables get substituted into the Info.plist template file at build time
 SET(MACOSX_BUNDLE_ICON_FILE opencpn.icns)
 SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PACKAGE_VERSION}")
@@ -1151,7 +1148,6 @@ ADD_EXECUTABLE(${PACKAGE_NAME} MACOSX_BUNDLE
       data/license.txt
       ${SOUND_FILES}
       buildosx/opencpn.icns
-      buildosx/MainMenu.xib
       )
 
 IF(BUNDLE_DOCS MATCHES "ON")

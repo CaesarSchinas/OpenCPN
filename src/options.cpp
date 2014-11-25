@@ -2458,6 +2458,9 @@ void options::CreateControls()
     int border_size = 4;
     int check_spacing = 2;
     int group_item_spacing = 2;           // use for items within one group, with Add(...wxALL)
+#ifdef __WXOSX__
+    border_size = 0;
+#endif
 
     int font_size_y, font_descent, font_lead;
     GetTextExtent( _T("0"), NULL, &font_size_y, &font_descent, &font_lead );
@@ -2485,9 +2488,11 @@ void options::CreateControls()
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer( wxVERTICAL );
     itemDialog1->SetSizer( itemBoxSizer2 );
 
-    m_pListbook = new wxListbook( itemDialog1, ID_NOTEBOOK, wxDefaultPosition, wxSize(-1, -1),
-            wxLB_TOP );
-    
+#ifdef __WXOSX__
+    m_pListbook = new wxToolbook( itemDialog1, ID_NOTEBOOK, wxDefaultPosition, wxSize(-1, -1), wxLB_TOP );
+#else
+    m_pListbook = new wxListbook( itemDialog1, ID_NOTEBOOK, wxDefaultPosition, wxSize(-1, -1), wxLB_TOP );
+
     //  Reduce the Font size on ListBook(ListView) selectors to allow single line layout
     if( g_bresponsive ) {
         wxListView* lv = m_pListbook->GetListView();
@@ -2495,7 +2500,8 @@ void options::CreateControls()
                                                      wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
         lv->SetFont( *sFont );
     }
-    
+#endif
+
     
     m_topImgList = new wxImageList( 40, 40, true, 1 );
     ocpnStyle::Style* style = g_StyleManager->GetCurrentStyle();

@@ -27,6 +27,9 @@
 #define _OPTIONS_H_
 
 
+#ifdef __WXOSX__
+#include <wx/toolbook.h>
+#endif
 #include <wx/listbook.h>
 #include <wx/dirctrl.h>
 #include <wx/spinctrl.h>
@@ -279,7 +282,11 @@ public:
 // Should we show tooltips?
     static bool ShowToolTips();
 
+#ifdef __WXOSX__
+    wxToolbook*             m_pListbook;
+#else
     wxListbook*             m_pListbook;
+#endif
     size_t                  m_pageDisplay, m_pageConnections, m_pageCharts, m_pageShips, m_pageUI, m_pagePlugins;
     int                     lastPage;
     wxPoint                 lastWindowPos;

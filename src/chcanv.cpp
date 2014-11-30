@@ -1075,7 +1075,7 @@ END_EVENT_TABLE()
 
 // Define a constructor for my canvas
 ChartCanvas::ChartCanvas ( wxFrame *frame ) :
-    wxWindow ( frame, wxID_ANY,    wxPoint ( 20,20 ), wxSize ( 5,5 ), wxSIMPLE_BORDER )
+    wxWindow ( frame, wxID_ANY, wxPoint ( 20,20 ), wxSize ( 5,5 ), wxBORDER_NONE )
 {
     parent_frame = ( MyFrame * ) frame;       // save a pointer to parent
 
@@ -4768,8 +4768,8 @@ void ChartCanvas::OnSize( wxSizeEvent& event )
 
 //    Resize the current viewport
 
-    VPoint.pix_width = m_canvas_width;
-    VPoint.pix_height = m_canvas_height;
+    VPoint.pix_width = m_canvas_width + 1;   // +1 to avoid a white border in OpenGL mode
+    VPoint.pix_height = m_canvas_height + 1; // ditto
 
     // Resize the scratch BM
     delete pscratch_bm;

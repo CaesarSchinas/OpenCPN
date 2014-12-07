@@ -156,6 +156,7 @@ enum {
     ID_MAGAPBCHECKBOX,
     ID_MOBILEBOX,
     ID_REPONSIVEBOX,
+    ID_DISPCATCHOICE,
     xID_OK
 };
 
@@ -261,7 +262,7 @@ public:
     void OnChooseFontColor( wxCommandEvent& event );
 #endif
     void OnOpenGLOptions( wxCommandEvent& event );
-    void OnDisplayCategoryRadioButton( wxCommandEvent& event );
+    void OnDisplayCategoryChoice( wxCommandEvent& event );
     void OnButtonClearClick( wxCommandEvent& event );
     void OnButtonSelectClick( wxCommandEvent& event );
     void OnPageChange( wxListbookEvent& event );

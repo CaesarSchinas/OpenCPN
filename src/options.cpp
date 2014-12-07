@@ -808,7 +808,7 @@ BEGIN_EVENT_TABLE( options, wxDialog )
     EVT_BUTTON( ID_BUTTONFONTCOLOR, options::OnChooseFontColor )
 #endif
     EVT_BUTTON( ID_OPENGLOPTIONS, options::OnOpenGLOptions )
-    EVT_CHOICE( ID_RADARDISTUNIT, options::OnDisplayCategoryRadioButton )
+    EVT_CHOICE( ID_DISPCATCHOICE, options::OnDisplayCategoryChoice )
     EVT_CHOICE( ID_DEPTHUNITSCHOICE, options::OnUnitsChoice )
     EVT_BUTTON( ID_CLEARLIST, options::OnButtonClearClick )
     EVT_BUTTON( ID_SELECTLIST, options::OnButtonSelectClick )
@@ -1821,7 +1821,7 @@ void options::CreatePanel_VectorCharts( size_t parent, int border_size, int grou
     // dislay category
     optionsColumn->Add( new wxStaticText(ps57Ctl, wxID_ANY, _("Display Category")), labelFlags );
     wxString pDispCatStrings[] = { _("Base"), _("Standard"), _("All"), _("Mariner's Standard") };
-    pDispCat = new wxChoice( ps57Ctl, ID_RADARDISTUNIT, wxDefaultPosition,
+    pDispCat = new wxChoice( ps57Ctl, ID_DISPCATCHOICE, wxDefaultPosition,
                             wxDefaultSize, 4, pDispCatStrings );
     optionsColumn->Add( pDispCat, 0, wxALL, 2 );
 
@@ -1893,19 +1893,19 @@ void options::CreatePanel_VectorCharts( size_t parent, int border_size, int grou
     // graphics options
     optionsColumn->Add( new wxStaticText(ps57Ctl, wxID_ANY, _("Graphics Style")), labelFlags );
     wxString pPointStyleStrings[] = { _("Paper Chart"), _("Simplified"), };
-    pPointStyle = new wxChoice( ps57Ctl, ID_RADARDISTUNIT, wxDefaultPosition,
+    pPointStyle = new wxChoice( ps57Ctl, wxID_ANY, wxDefaultPosition,
             wxDefaultSize, 2, pPointStyleStrings );
     optionsColumn->Add( pPointStyle, inputFlags );
 
     optionsColumn->Add( new wxStaticText(ps57Ctl, wxID_ANY, _("Boundaries")), labelFlags );
     wxString pBoundStyleStrings[] = { _("Plain"), _("Symbolized"), };
-    pBoundStyle = new wxChoice( ps57Ctl, ID_RADARDISTUNIT, wxDefaultPosition,
+    pBoundStyle = new wxChoice( ps57Ctl, wxID_ANY, wxDefaultPosition,
             wxDefaultSize, 2, pBoundStyleStrings );
     optionsColumn->Add( pBoundStyle, inputFlags );
 
     optionsColumn->Add( new wxStaticText(ps57Ctl, wxID_ANY, _("Colors")), labelFlags );
     wxString pColorNumStrings[] = { _("2 Color"), _("4 Color"), };
-    p24Color = new wxChoice( ps57Ctl, ID_RADARDISTUNIT, wxDefaultPosition,
+    p24Color = new wxChoice( ps57Ctl, wxID_ANY, wxDefaultPosition,
             wxDefaultSize, 2, pColorNumStrings );
     optionsColumn->Add( p24Color, inputFlags );
 
@@ -3289,7 +3289,7 @@ void options::OnChartDirListSelect( wxCommandEvent& event )
     
 }
 
-void options::OnDisplayCategoryRadioButton( wxCommandEvent& event )
+void options::OnDisplayCategoryChoice( wxCommandEvent& event )
 {
     int select = pDispCat->GetSelection();
 

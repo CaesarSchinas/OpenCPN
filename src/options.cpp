@@ -1602,49 +1602,6 @@ void options::CreatePanel_Ownship( size_t parent, int border_size, int group_ite
     rangeRingRow->Add( m_lengthUnitsRangeRing, inputFlags );
 
 
-
-    // Tracks
-    wxFlexGridSizer* trackOptions = new wxFlexGridSizer(2);
-    trackOptions->SetFlexibleDirection(wxVERTICAL);
-    trackOptions->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_ALL);
-    ownShip->Add( trackOptions, 0, wxALIGN_CENTER, 0 );
-
-    // spacer
-    trackOptions->Add( 0, border_size*4 );
-    trackOptions->Add( 0, border_size*4 );
-
-    trackOptions->Add( new wxStaticText( itemPanelShip, wxID_ANY, _("Tracks") ), groupLabelFlags );
-    wxBoxSizer* trackBox = new wxBoxSizer(wxVERTICAL);
-    trackOptions->Add(trackBox);
-
-    pTrackDaily = new wxCheckBox( itemPanelShip, ID_DAILYCHECKBOX, _("Automatic Daily Tracks") );
-    trackBox->Add( pTrackDaily, inputFlags );
-
-    pTrackHighlite = new wxCheckBox( itemPanelShip, ID_TRACKHILITE, _("Highlight Tracks") );
-    trackBox->Add( pTrackHighlite, inputFlags );
-
-    trackOptions->Add( new wxStaticText( itemPanelShip, wxID_ANY, _("Tracking Precision") ), labelFlags );
-    wxString trackAlt[] = { _("Low"), _("Medium"), _("High") };
-    pTrackPrecision = new wxChoice( itemPanelShip, wxID_ANY, wxDefaultPosition, m_pShipIconType->GetSize(), 3, trackAlt );
-    trackOptions->Add( pTrackPrecision, inputFlags );
-
-    // spacer
-    trackOptions->Add( 0, border_size*4 );
-    trackOptions->Add( 0, border_size*4 );
-
-    //  Routes
-    trackOptions->Add( new wxStaticText( itemPanelShip, wxID_ANY, _("Route Waypoint Arrival Radius") ), labelFlags );
-    wxBoxSizer* wptRadiusRow = new wxBoxSizer(wxHORIZONTAL);
-    trackOptions->Add(wptRadiusRow);
-    m_pText_ACRadius = new wxTextCtrl( itemPanelShip, ID_TEXTCTRL, _T(""), wxDefaultPosition, wxSize(50, -1), wxTE_RIGHT );
-    wptRadiusRow->Add( m_pText_ACRadius, inputFlags );
-    m_lengthUnitsWptRadius = new wxStaticText( itemPanelShip, wxID_ANY, _("nautical miles") );
-    wptRadiusRow->Add( m_lengthUnitsWptRadius, inputFlags );
-
-    trackOptions->Add( 0, border_size*4 );
-    pSailing = new wxCheckBox( itemPanelShip, ID_DAILYCHECKBOX, _("Advance route waypoint on arrival only") );
-    trackOptions->Add( pSailing, inputFlags );
-
 }
 
 void options::CreatePanel_ChartsLoad( size_t parent, int border_size, int group_item_spacing,
@@ -1787,34 +1744,6 @@ void options::CreatePanel_Advanced( size_t parent, int border_size, int group_it
     // spacer
     itemBoxSizerUI->Add( 0, border_size*3 );
     itemBoxSizerUI->Add( 0, border_size*3 );
-
-
-    // Control Options
-    itemBoxSizerUI->Add( new wxStaticText( m_ChartDisplayPage, wxID_ANY, _("Controls") ), groupLabelFlags );
-    wxBoxSizer* boxCtrls = new wxBoxSizer( wxVERTICAL );
-    itemBoxSizerUI->Add( boxCtrls, groupInputFlags );
-
-    pWayPointPreventDragging = new wxCheckBox( m_ChartDisplayPage, ID_DRAGGINGCHECKBOX, _("Lock Waypoints (Unless waypoint property dialog visible)") );
-    pWayPointPreventDragging->SetValue( FALSE );
-    boxCtrls->Add( pWayPointPreventDragging, inputFlags );
-
-    pConfirmObjectDeletion = new wxCheckBox( m_ChartDisplayPage, ID_DELETECHECKBOX, _("Confirm deletion of tracks and routes") );
-    pConfirmObjectDeletion->SetValue( FALSE );
-    boxCtrls->Add( pConfirmObjectDeletion, inputFlags );
-
-    // spacer
-    itemBoxSizerUI->Add( 0, border_size*3 );
-    itemBoxSizerUI->Add( 0, border_size*3 );
-
-
-    itemBoxSizerUI->Add( 0, border_size*3 );
-    pPlayShipsBells = new wxCheckBox( m_ChartDisplayPage, ID_BELLSCHECKBOX, _("Play Ships Bells"));
-    itemBoxSizerUI->Add( pPlayShipsBells, inputFlags );
-
-
-    // spacer
-    itemBoxSizerUI->Add( 0, border_size*3 );
-    itemBoxSizerUI->Add( 0, border_size*3 );
     
     
     // OpenGL Options
@@ -1830,6 +1759,15 @@ void options::CreatePanel_Advanced( size_t parent, int border_size, int group_it
     OpenGLSizer->Add( bOpenGL, inputFlags );
     bOpenGL->Enable(!g_bdisable_opengl);
 
+
+    // spacer
+    itemBoxSizerUI->Add( 0, border_size*3 );
+    itemBoxSizerUI->Add( 0, border_size*3 );
+
+
+    itemBoxSizerUI->Add( new wxStaticText( m_ChartDisplayPage, wxID_ANY, _("Misc") ), labelFlags );
+    pPlayShipsBells = new wxCheckBox( m_ChartDisplayPage, ID_BELLSCHECKBOX, _("Play Ships Bells"));
+    itemBoxSizerUI->Add( pPlayShipsBells, inputFlags );
 
 }
 
@@ -2349,6 +2287,84 @@ void options::CreatePanel_Units( size_t parent, int border_size, int group_item_
 
 }
 
+void options::CreatePanel_Waypoints( size_t parent, int border_size, int group_item_spacing,
+                                wxSize small_button_size )
+{
+    wxScrolledWindow *panelWpts = AddPage( parent, _("Routes && Marks") );
+
+    wxFlexGridSizer *wptsSizer = new wxFlexGridSizer( 2 );
+    wptsSizer->SetHGap(border_size);
+    //    wptsSizer->AddGrowableCol( 0, 1 );
+    //    wptsSizer->AddGrowableCol( 1, 1 );
+    //    panelWpts->SetSizer( wptsSizer );
+
+    // wxFlexGridSizer grows wrongly in wx2.8, so we need to centre it in another sizer instead of letting it grow.
+    wxBoxSizer* wrapperSizer = new wxBoxSizer( wxVERTICAL );
+    panelWpts->SetSizer( wrapperSizer );
+    wrapperSizer->Add( wptsSizer, 1, wxALL | wxALIGN_CENTER, border_size );
+    
+    
+    // spacer
+    wptsSizer->Add( 0, border_size*4 );
+    wptsSizer->Add( 0, border_size*4 );
+
+
+    //  Routes
+    wptsSizer->Add( new wxStaticText( panelWpts, wxID_ANY, _("Route Waypoint Arrival Radius") ), labelFlags );
+    wxBoxSizer* wptRadiusRow = new wxBoxSizer(wxHORIZONTAL);
+    wptsSizer->Add(wptRadiusRow);
+    m_pText_ACRadius = new wxTextCtrl( panelWpts, ID_TEXTCTRL, _T(""), wxDefaultPosition, wxSize(50, -1), wxTE_RIGHT );
+    wptRadiusRow->Add( m_pText_ACRadius, inputFlags );
+    m_lengthUnitsWptRadius = new wxStaticText( panelWpts, wxID_ANY, _("nautical miles") );
+    wptRadiusRow->Add( m_lengthUnitsWptRadius, inputFlags );
+
+    wptsSizer->Add( new wxStaticText( panelWpts, wxID_ANY, _T("") ), labelFlags );
+    pSailing = new wxCheckBox( panelWpts, ID_DAILYCHECKBOX, _("Advance route waypoint on arrival only") );
+    wptsSizer->Add( pSailing, inputFlags );
+
+
+    // spacer
+    wptsSizer->Add( 0, border_size*4 );
+    wptsSizer->Add( 0, border_size*4 );
+
+
+    // Tracks
+    wptsSizer->Add( new wxStaticText( panelWpts, wxID_ANY, _("Tracks") ), groupLabelFlags );
+    wxBoxSizer* trackBox = new wxBoxSizer(wxVERTICAL);
+    wptsSizer->Add(trackBox);
+
+    pTrackDaily = new wxCheckBox( panelWpts, ID_DAILYCHECKBOX, _("Automatic Daily Tracks") );
+    trackBox->Add( pTrackDaily, inputFlags );
+
+    pTrackHighlite = new wxCheckBox( panelWpts, ID_TRACKHILITE, _("Highlight Tracks") );
+    trackBox->Add( pTrackHighlite, inputFlags );
+
+    wptsSizer->Add( new wxStaticText( panelWpts, wxID_ANY, _("Tracking Precision") ), labelFlags );
+    wxString trackAlt[] = { _("Low"), _("Medium"), _("High") };
+    pTrackPrecision = new wxChoice( panelWpts, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, trackAlt );
+    wptsSizer->Add( pTrackPrecision, inputFlags );
+
+
+    // spacer
+    wptsSizer->Add( 0, border_size*4 );
+    wptsSizer->Add( 0, border_size*4 );
+
+
+    // Controls
+    wptsSizer->Add( new wxStaticText( panelWpts, wxID_ANY, _("Controls") ), groupLabelFlags );
+    wxBoxSizer* boxCtrls = new wxBoxSizer( wxVERTICAL );
+    wptsSizer->Add( boxCtrls, groupInputFlags );
+
+    pWayPointPreventDragging = new wxCheckBox( panelWpts, ID_DRAGGINGCHECKBOX, _("Lock Waypoints (Unless waypoint property dialog visible)") );
+    pWayPointPreventDragging->SetValue( FALSE );
+    boxCtrls->Add( pWayPointPreventDragging, inputFlags );
+
+    pConfirmObjectDeletion = new wxCheckBox( panelWpts, ID_DELETECHECKBOX, _("Confirm deletion of tracks and routes") );
+    pConfirmObjectDeletion->SetValue( FALSE );
+    boxCtrls->Add( pConfirmObjectDeletion, inputFlags );
+
+}
+
 void options::CreatePanel_MMSI( size_t parent, int border_size, int group_item_spacing, wxSize small_button_size )
 {
     wxScrolledWindow *panelMMSI = AddPage( parent, _("MMSI Properties") );
@@ -2770,6 +2786,7 @@ void options::CreateControls()
     m_pageDisplay = CreatePanel( _("Display") );
     CreatePanel_Display( m_pageDisplay, border_size, group_item_spacing, small_button_size );
     CreatePanel_Units( m_pageDisplay, border_size, group_item_spacing, small_button_size );
+    CreatePanel_Waypoints( m_pageDisplay, border_size, group_item_spacing, small_button_size );
     CreatePanel_Advanced( m_pageDisplay, border_size, group_item_spacing, small_button_size );
 
     m_pageCharts = CreatePanel( _("Charts") );

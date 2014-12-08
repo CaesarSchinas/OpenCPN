@@ -2008,6 +2008,11 @@ int MyConfig::LoadMyConfig( int iteration )
     g_pNavAidRadarRingsStepUnits = 0;
     Read( _T ( "RadarRingsStepUnits" ), &g_pNavAidRadarRingsStepUnits );
 
+    if ( g_pNavAidRadarRingsStepUnits == 1 ) {
+        g_fNavAidRadarRingsStep /= 1.852;  // We used to store this in the user specified unit,
+        g_pNavAidRadarRingsStepUnits = 0;  // NMi or km, but now we always store it in NMi.
+    }
+
     //  Support Version 3.0 and prior config setting for Radar Rings
     bool b300RadarRings= true;
     Read ( _T ( "ShowRadarRings" ), &b300RadarRings );
@@ -2771,7 +2776,7 @@ void MyConfig::UpdateSettings()
     Write( _T ( "ShowRadarRings" ), (bool)(g_iNavAidRadarRingsNumberVisible > 0) );  //3.0.0 config support
     Write( _T ( "RadarRingsNumberVisible" ), g_iNavAidRadarRingsNumberVisible );
     Write( _T ( "RadarRingsStep" ), g_fNavAidRadarRingsStep );
-    Write( _T ( "RadarRingsStepUnits" ), g_pNavAidRadarRingsStepUnits );
+    Write( _T ( "RadarRingsStepUnits" ), g_pNavAidRadarRingsStepUnits ); // always NMi now, but we will save it for back compat
 
     Write( _T ( "ConfirmObjectDeletion" ), g_bConfirmObjectDelete );
 

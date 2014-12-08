@@ -810,6 +810,7 @@ BEGIN_EVENT_TABLE( options, wxDialog )
     EVT_BUTTON( ID_OPENGLOPTIONS, options::OnOpenGLOptions )
     EVT_CHOICE( ID_DISPCATCHOICE, options::OnDisplayCategoryChoice )
     EVT_CHOICE( ID_DEPTHUNITSCHOICE, options::OnUnitsChoice )
+    EVT_CHOICE( ID_DISTANCEUNITSCHOICE, options::OnUnitsChoice )
     EVT_BUTTON( ID_CLEARLIST, options::OnButtonClearClick )
     EVT_BUTTON( ID_SELECTLIST, options::OnButtonSelectClick )
     EVT_BUTTON( ID_AISALERTSELECTSOUND, options::OnButtonSelectSound )
@@ -2971,14 +2972,10 @@ void options::SetInitialSettings()
     m_pOSGPSOffsetX->SetValue( wxString::Format( _T("%.1f"), g_n_gps_antenna_offset_x ) );
     m_pOSGPSOffsetY->SetValue( wxString::Format( _T("%.1f"), g_n_gps_antenna_offset_y ) );
     m_pOSMinSize->SetValue( wxString::Format( _T("%d"), g_n_ownship_min_mm ) );
-    m_pText_ACRadius->SetValue( wxString::Format( _T("%.2f"), g_n_arrival_circle_radius ) );
-    
-    wxString buf;
+    // range ring and waypoint arrival ring are set from UpdateOptionsUnits()
+
     if( g_iNavAidRadarRingsNumberVisible > 10 ) g_iNavAidRadarRingsNumberVisible = 10;
     pNavAidRadarRingsNumberVisible->SetSelection( g_iNavAidRadarRingsNumberVisible );
-    buf.Printf( _T("%.3f"), g_fNavAidRadarRingsStep );
-    pNavAidRadarRingsStep->SetValue( buf );
-//    m_itemRadarRingsUnits->SetSelection( g_pNavAidRadarRingsStepUnits );
     OnRadarringSelect( eDummy );
 
     pWayPointPreventDragging->SetValue( g_bWayPointPreventDragging );
@@ -3176,6 +3173,8 @@ void options::SetInitialSettings()
 void options::UpdateOptionsUnits()
 {
     int depthUnit = pDepthUnitSelect->GetSelection();
+    int distUnit = pDistanceFormat->GetSelection();
+
 
     // set depth unit labels
     wxString depthUnitStrings[] = { _("feet"), _("meters"), _("fathoms") };
@@ -3185,25 +3184,53 @@ void options::UpdateOptionsUnits()
     m_depthUnitsDeep->SetLabel(depthUnitString);
 
     // depth unit conversion factor
-    float conv = 1;
+    float depthConv = 1;
     if ( depthUnit == 0 ) // feet
-        conv = 0.3048; // international definiton of 1 foot is 0.3048 metres
+        depthConv = 0.3048; // international definiton of 1 foot is 0.3048 metres
     else if ( depthUnit == 2 ) // fathoms
-        conv = 0.3048 * 6; // 1 fathom is 6 feet
+        depthConv = 0.3048 * 6; // 1 fathom is 6 feet
 
     // set depth input values
     wxString s;
-    s.Printf( _T("%6.2f"), S52_getMarinerParam( S52_MAR_SHALLOW_CONTOUR ) / conv );
+    s.Printf( _T("%6.2f"), S52_getMarinerParam( S52_MAR_SHALLOW_CONTOUR ) / depthConv );
     s.Trim(false);
     m_ShallowCtl->SetValue( s );
 
-    s.Printf( _T("%6.2f"), S52_getMarinerParam( S52_MAR_SAFETY_CONTOUR ) / conv );
+    s.Printf( _T("%6.2f"), S52_getMarinerParam( S52_MAR_SAFETY_CONTOUR ) / depthConv );
     s.Trim(false);
     m_SafetyCtl->SetValue( s );
 
-    s.Printf( _T("%6.2f"), S52_getMarinerParam( S52_MAR_DEEP_CONTOUR ) / conv );
+    s.Printf( _T("%6.2f"), S52_getMarinerParam( S52_MAR_DEEP_CONTOUR ) / depthConv );
     s.Trim(false);
     m_DeepCtl->SetValue( s );
+
+
+
+    // set distance unit labels
+    wxString distUnitStrings[] = { _("nautical miles"), _("statute miles"), _("kilometers"), _("meters") };
+    wxString distUnitString = distUnitStrings[distUnit];
+    m_lengthUnitsRangeRing->SetLabel(distUnitString);
+    m_lengthUnitsWptRadius->SetLabel(distUnitString);
+
+    // distance unit conversion factor
+    float distConv = 1;
+    switch (distUnit) {
+        case 1: // statute miles
+            distConv = (5280 * 0.3048) / 1852;  // 1mi = 5280ft... 1ft = 0.3048m... 1852m = 1NMi
+            break;
+
+        case 2: // kilometres
+            distConv = 1.852;
+            break;
+
+        case 3: // metres
+            distConv = 1852;
+            break;
+    }
+
+    // set distance input values
+    m_pText_ACRadius->SetValue( wxString::Format( _T("%.2f"), g_n_arrival_circle_radius * distConv ) );
+    pNavAidRadarRingsStep->SetValue( wxString::Format( _T("%.3f"), g_fNavAidRadarRingsStep * distConv ) );
 }
 
 void options::OnUnitsChoice( wxCommandEvent& event )
@@ -3623,8 +3650,6 @@ void options::OnApplyClick( wxCommandEvent& event )
     }
     g_OwnShipIconType = m_pShipIconType->GetSelection();
 
-    m_pText_ACRadius->GetValue().ToDouble( &g_n_arrival_circle_radius );
-    
     //    Handle Chart Tab
     wxString dirname;
 
@@ -3734,8 +3759,7 @@ void options::OnApplyClick( wxCommandEvent& event )
     m_pText_OSHDT_Predictor->GetValue().ToDouble( &g_ownship_HDTpredictor_miles );
     
     g_iNavAidRadarRingsNumberVisible = pNavAidRadarRingsNumberVisible->GetSelection();
-    g_fNavAidRadarRingsStep = atof( pNavAidRadarRingsStep->GetValue().mb_str() );
-//    g_pNavAidRadarRingsStepUnits = m_itemRadarRingsUnits->GetSelection();
+    // g_fNavAidRadarRingsStep see below
     g_bWayPointPreventDragging = pWayPointPreventDragging->GetValue();
     g_bConfirmObjectDelete = pConfirmObjectDeletion->GetValue();
 
@@ -3989,28 +4013,51 @@ void options::OnApplyClick( wxCommandEvent& event )
         double dval;
         int depthUnit = pDepthUnitSelect->GetSelection();
 
-        float conv = 1;
+        float depthConv = 1;
         if ( depthUnit == 0 ) // feet
-            conv = 0.3048; // international definiton of 1 foot is 0.3048 metres
+            depthConv = 0.3048; // international definiton of 1 foot is 0.3048 metres
         else if ( depthUnit == 2 ) // fathoms
-            conv = 0.3048 * 6; // 1 fathom is 6 feet
+            depthConv = 0.3048 * 6; // 1 fathom is 6 feet
 
         if( ( m_SafetyCtl->GetValue() ).ToDouble( &dval ) ) {
-            S52_setMarinerParam( S52_MAR_SAFETY_DEPTH, dval * conv );   // controls sounding display
-            S52_setMarinerParam( S52_MAR_SAFETY_CONTOUR, dval * conv ); // controls colour
+            S52_setMarinerParam( S52_MAR_SAFETY_DEPTH, dval * depthConv );   // controls sounding display
+            S52_setMarinerParam( S52_MAR_SAFETY_CONTOUR, dval * depthConv ); // controls colour
         }
 
         if( ( m_ShallowCtl->GetValue() ).ToDouble( &dval ) )
-            S52_setMarinerParam( S52_MAR_SHALLOW_CONTOUR, dval * conv );
+            S52_setMarinerParam( S52_MAR_SHALLOW_CONTOUR, dval * depthConv );
 
         if( ( m_DeepCtl->GetValue() ).ToDouble( &dval ) )
-            S52_setMarinerParam( S52_MAR_DEEP_CONTOUR, dval * conv );
+            S52_setMarinerParam( S52_MAR_DEEP_CONTOUR, dval * depthConv );
 
         ps52plib->UpdateMarinerParams();
 
         ps52plib->m_nDepthUnitDisplay = depthUnit;
 
         ps52plib->GenerateStateHash();
+
+
+        // Distances
+        int distUnit = pDistanceFormat->GetSelection();
+
+        float distConv = 1;
+        switch (distUnit) {
+            case 1: // statute miles
+                distConv = (5280 * 0.3048) / 1852;  // 1mi = 5280ft... 1ft = 0.3048m... 1852m = 1NMi
+                break;
+            case 2: // kilometres
+                distConv = 1.852;
+                break;
+            case 3: // metres
+                distConv = 1852;
+                break;
+        }
+
+        pNavAidRadarRingsStep->GetValue().ToDouble( &dval );
+        g_fNavAidRadarRingsStep = dval / distConv;
+
+        m_pText_ACRadius->GetValue().ToDouble( &dval );
+        g_n_arrival_circle_radius = dval / distConv;
     }
 #endif
 

@@ -502,8 +502,9 @@ public:
     wxTextCtrl                *m_pText_Show_Target_Name_Scale;
     wxCheckBox                *m_pCheck_Wpl_Aprs;
     wxCheckBox                *m_pCheck_ShowAllCPA;
+
 //    For Ship page
-    wxFlexGridSizer*        realSizes;
+    wxGridSizer*            realSizes;
     wxTextCtrl              *m_pOSLength;
     wxTextCtrl              *m_pOSWidth;
     wxTextCtrl              *m_pOSGPSOffsetX;
@@ -513,7 +514,17 @@ public:
     wxScrolledWindow        *itemPanelShip;
     wxBoxSizer              *ownShip;
     wxTextCtrl              *m_pText_ACRadius;
-    
+    wxStaticText*           m_lengthUnitsCog;
+    wxStaticText*           m_lengthUnitsHdt;
+    wxStaticText*           m_lengthUnitsOsLoa;
+    wxStaticText*           m_lengthUnitsOsBeam;
+    wxStaticText*           m_lengthUnitsGpsOffY;
+    wxStaticText*           m_lengthUnitsGpsOffX;
+    wxStaticText*           m_lengthUnitsOsScreen;
+    wxStaticText*           m_lengthUnitsRangeRing;
+    wxStaticText*           m_lengthUnitsWptRadius;
+
+
 //    For Fonts page
     wxBoxSizer              *m_itemBoxSizerFontPanel;
     wxChoice                *m_itemFontElementListBox;
@@ -529,7 +540,7 @@ public:
     int                     k_plugins;
 
     wxChoice                *pNavAidRadarRingsNumberVisible;
-    wxFlexGridSizer         *radarGrid;
+    wxGridSizer             *radarGrid;
     wxTextCtrl              *pNavAidRadarRingsStep;
     wxChoice                *m_itemRadarRingsUnits;
     wxCheckBox              *pWayPointPreventDragging;
